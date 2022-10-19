@@ -78,7 +78,11 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
     tier:     'Standard'
     capacity: vmssInstanceCount
   }
-  plan: locations[imageLocation].plan
+  plan: {
+    name:      vmssImgSku
+    publisher: vmssImgPublisher
+    product:   vmssImgProduct
+  }  
   properties: {
     singlePlacementGroup: false
     upgradePolicy: {
@@ -93,7 +97,12 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
             storageAccountType: vmssOsDiskType
           }
         }
-        imageReference: locations[imageLocation].imageReference
+        imageReference: {
+          publisher: vmssImgPublisher
+          offer:     vmssImgProduct
+          sku:       vmssImgSku
+          version:   vmssImgVersion
+	        }
       }
       networkProfile: {
         networkInterfaceConfigurations: [
