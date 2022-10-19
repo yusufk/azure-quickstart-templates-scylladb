@@ -31,7 +31,7 @@ org-mode-config.el
 .DS_Store
 org-clock-save.el
 emacs-config.el
-.vscode
+
 node_modules
 Nese_OMS_NEstedforOMSWS.json
 test/template-validation-tests/package-lock.json
@@ -43,3 +43,7 @@ test/ci-scripts/azuredeploy.parameters.new.json
 test/ci-scripts/Kill-Kill.ps1
 
 quickstarts/microsoft.customproviders/custom-rp-with-function/src/obj/**
+.vscode/extensions.json
+.vscode/launch.json
+.vscode/settings.json
+.vscode/tasks.json

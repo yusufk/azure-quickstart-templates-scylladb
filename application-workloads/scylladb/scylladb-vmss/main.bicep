@@ -4,8 +4,8 @@ param location string = resourceGroup().location
 @description('Name of VMSS Cluster')
 param vmssName string
 
-@description('GameDev Sku')
-param vmssSku string = 'Standard_D4ds_v4'
+@description('VMSS VM Sku')
+param vmssSku string = 'Standard_L16s_v3'
 
 @description('Image Publisher')
 @allowed([
@@ -25,10 +25,10 @@ param vmssImgProduct string = 'scylla-enterprise'
 ])
 param vmssImgSku string = 'scylla-enterprise-vm'
 
-@description('GameDev Image Product Id')
+@description('VMSS Image Product Id')
 param vmssImgVersion string = 'latest'
 
-@description('GameDev Disk Type')
+@description('VMSS Disk Type')
 param vmssOsDiskType string = 'Premium_LRS'
 
 @description('VMSS Instance Count')
@@ -53,7 +53,7 @@ param subnetName string = 'subnet${vmssName}'
 param networkSecurityGroupName string = 'nsg-${vmssName}'
 
 @description('Virtual Network Address Prefix')
-param vnetAddressPrefix string = '172.17.72.0/24' //Change as needed
+param vnetAddressPrefix array = [ '172.17.72.0/24' ] //Change as needed
 
 @description('Virtual Network Subnet Address Prefix')
 param subnetAddressPrefix string = '172.17.72.0/25' // 172.17.72.[0-128] is part of this subnet
@@ -70,7 +70,7 @@ module vnet './nestedtemplates/virtualNetworks.bicep'  = {
   }
 }
 
-resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
+resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
   name: vmssName
   location: location
   sku: {
@@ -78,11 +78,7 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
     tier:     'Standard'
     capacity: vmssInstanceCount
   }
-  plan: {
-    name:      vmssImgSku
-    publisher: vmssImgPublisher
-    product:   vmssImgProduct
-  }  
+  plan: locations[imageLocation].plan
   properties: {
     singlePlacementGroup: false
     upgradePolicy: {
@@ -97,12 +93,7 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
             storageAccountType: vmssOsDiskType
           }
         }
-        imageReference: {
-          publisher: vmssImgPublisher
-          offer:     vmssImgProduct
-          sku:       vmssImgSku
-          version:   vmssImgVersion
-	}
+        imageReference: locations[imageLocation].imageReference
       }
       networkProfile: {
         networkInterfaceConfigurations: [
@@ -115,7 +106,7 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
                   name: '${vmssName}IpConfig'
                   properties: {
                     subnet: {
-                      id: az.resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnetName)
+                      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, subnetName)
                     }
                   }
                 }
@@ -131,9 +122,7 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
         computerNamePrefix: vmssName
         adminUsername:      administratorLogin
         adminPassword:      passwordAdministratorLogin
-	windowsConfiguration: {
-          provisionVMAgent: true
-        }	
+        customData: loadFileAsBase64('scyllaDBConfig.json')
       }
       priority: 'Regular'
     }
@@ -143,3 +132,4 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
 
 output id   string = vmss.id
 output name string = vmss.name
+

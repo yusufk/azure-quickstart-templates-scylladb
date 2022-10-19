@@ -1,8 +1,8 @@
 param location                 string
-param vnetAddressPrefix        string
+param vnetAddressPrefix        array
 param subnetAddressPrefix      string
 param vnetName                 string
-param subnetName               string 
+param subnetName               string
 param networkSecurityGroupName string
 
 //By Default the nsg will allow the vnet access and deny all other access
@@ -16,9 +16,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   location: location
   properties: {
     addressSpace: {
-      addressPrefixes: [
-        vnetAddressPrefix
-      ]
+      addressPrefixes: vnetAddressPrefix
     }
     enableDdosProtection: false
     subnets: [
@@ -42,6 +40,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   }
 }
 
-output vnetId   string = vnet.id
-output vnet     string = vnet.name
-output nsgID    string = networkSecurityGroup.id
+output vnetId     string = vnet.id
+output vnet       string = vnet.name
+output nsgID      string = networkSecurityGroup.id
+output subnetName string = subnetName
