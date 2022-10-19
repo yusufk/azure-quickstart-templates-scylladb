@@ -3,13 +3,22 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vmssName": {
-            "value": "GEN-UNIQUE-7"
+            "value": "ScyllaDB_VMSS"
+        },
+        "vmssSku": {
+            "value": "Standard_L16s_v3"
+        },
+        "vmssOsDiskType": {
+            "value": "Premium_LRS"
+        },
+        "vmssInstanceCount": {
+            "value": 1
         },
         "administratorLogin": {
-            "value": "GEN-UNIQUE"
+            "value": "scyllaadmin"
         },
         "passwordAdministratorLogin": {
-            "value": "GEN-PASSWORD"
+            "value": "B1g-D6taR0ck$"
         }
     }
 }
